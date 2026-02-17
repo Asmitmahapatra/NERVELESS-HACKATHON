@@ -49,6 +49,16 @@ router.get("/", async (req, res) => {
 // Create post
 router.post("/", auth, async (req, res) => {
   try {
+    const isDemoMode = Boolean(req.app?.locals?.demoMode);
+    if (isDemoMode) {
+      const post = await demoStore.createPost({
+        content: req.body?.content,
+        category: req.body?.category,
+        authorId: req.user.userId,
+      });
+      return res.status(201).json(post);
+    }
+
     const post = new Post({
       ...req.body,
       author: req.user.userId,
@@ -69,6 +79,17 @@ router.post("/", auth, async (req, res) => {
 // Like post
 router.post("/:postId/like", auth, async (req, res) => {
   try {
+    const isDemoMode = Boolean(req.app?.locals?.demoMode);
+    if (isDemoMode) {
+      const post = await demoStore.togglePostLike(req.params.postId, req.user.userId);
+      if (!post) return res.status(404).json({ error: "Post not found" });
+      return res.json({
+        success: true,
+        likes: (post.likes || []).length,
+        post,
+      });
+    }
+
     const post = await Post.findById(req.params.postId);
 
     const userIndex = post.likes.indexOf(req.user.userId);
@@ -100,6 +121,14 @@ router.post("/:postId/like", auth, async (req, res) => {
 router.post("/:postId/comment", auth, async (req, res) => {
   try {
     const { content } = req.body;
+
+    const isDemoMode = Boolean(req.app?.locals?.demoMode);
+    if (isDemoMode) {
+      const post = await demoStore.addPostComment(req.params.postId, req.user.userId, content);
+      if (!post) return res.status(404).json({ error: "Post not found" });
+      return res.json({ success: true, post });
+    }
+
     const post = await Post.findByIdAndUpdate(
       req.params.postId,
       {

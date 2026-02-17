@@ -2,6 +2,28 @@ const API_BASE = "/api";
 let token = localStorage.getItem("authToken") || "";
 let currentUser = null;
 
+function escapeHtml(unsafe) {
+  return String(unsafe || "")
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#039;");
+}
+
+function setListState(container, { variant = "info", title = "", detail = "" } = {}) {
+  if (!container) return;
+  const safeTitle = escapeHtml(title);
+  const safeDetail = escapeHtml(detail);
+  container.dataset.state = variant;
+  container.innerHTML = `
+    <div style="padding: 0.75rem 0; opacity: 0.9;">
+      <strong>${safeTitle}</strong>
+      ${safeDetail ? `<div>${safeDetail}</div>` : ""}
+    </div>
+  `;
+}
+
 function setToken(newToken) {
   token = newToken || "";
   if (token) localStorage.setItem("authToken", token);
@@ -87,11 +109,23 @@ async function getMatches() {
 async function getConnections() {
   return await apiCall("/users/connections");
 }
-async function getJobs() {
-  return await apiCall("/jobs");
+async function getJobs(params = {}) {
+  const qs = new URLSearchParams();
+  Object.entries(params).forEach(([k, v]) => {
+    if (v === undefined || v === null || v === "") return;
+    qs.set(k, String(v));
+  });
+  const suffix = qs.toString() ? `?${qs.toString()}` : "";
+  return await apiCall(`/jobs${suffix}`);
 }
-async function getEvents() {
-  return await apiCall("/events");
+async function getEvents(params = {}) {
+  const qs = new URLSearchParams();
+  Object.entries(params).forEach(([k, v]) => {
+    if (v === undefined || v === null || v === "") return;
+    qs.set(k, String(v));
+  });
+  const suffix = qs.toString() ? `?${qs.toString()}` : "";
+  return await apiCall(`/events${suffix}`);
 }
 async function getPosts() {
   return await apiCall("/posts");
@@ -117,10 +151,26 @@ async function connectUser(userId) {
 async function applyJob(jobId) {
   await apiCall(`/jobs/${jobId}/apply`);
   alert("✅ Applied!");
+
+  if (document.querySelector(".job-list")) {
+    try {
+      await loadJobsPage();
+    } catch {
+      // ignore
+    }
+  }
 }
 async function rsvpEvent(eventId) {
   await apiCall(`/events/${eventId}/rsvp`);
   alert("✅ RSVP Confirmed!");
+
+  if (document.querySelector(".event-list")) {
+    try {
+      await loadEventsPage();
+    } catch {
+      // ignore
+    }
+  }
 }
 
 // MAIN HANDLERS
@@ -130,11 +180,13 @@ async function handleAuthSubmit(e) {
 
   try {
     if (isLogin) {
-      await loginUser(
+      const result = await loginUser(
         document.getElementById("loginEmail").value,
         document.getElementById("loginPassword").value,
       );
-      window.location.href = "dashboard.html";
+      const role = result?.user?.role;
+      if (role === "admin") window.location.href = "admin.html";
+      else window.location.href = "dashboard.html";
     } else {
       await registerUser({
         name: document.getElementById("regName").value,
@@ -290,81 +342,204 @@ async function loadJobsPage() {
   const list = document.querySelector(".job-list");
   if (!list) return;
 
-  try {
-    const payload = await getJobs();
-    const jobs = payload.jobs || [];
-    if (!jobs.length) return;
+  const filtersRow = document.querySelector(".filters-row");
+  const filterSelects = filtersRow
+    ? Array.from(filtersRow.querySelectorAll("select.filter-select"))
+    : [];
+  const filterButton = filtersRow
+    ? filtersRow.querySelector("button.btn-primary")
+    : null;
 
-    list.innerHTML = jobs
-      .map(
-        (job) => `
-        <div class="job-card">
-          <div class="job-header">
-            <h3>${job.title}</h3>
-            <div class="job-meta">
-              <span class="job-company">${job.company || ""}</span>
-              <span class="job-location">• ${job.location || ""}</span>
-              <span class="job-type">${job.type || ""}</span>
+  const mapJobType = (label) => {
+    const v = String(label || "").toLowerCase();
+    if (v.includes("full")) return "fulltime";
+    if (v.includes("intern")) return "internship";
+    if (v.includes("contract")) return "contract";
+    return "";
+  };
+
+  const getFilterValues = () => {
+    const [_domainSel, locationSel, typeSel] = filterSelects;
+    const location =
+      locationSel?.value && !String(locationSel.value).toLowerCase().includes("all")
+        ? locationSel.value
+        : "";
+    const type =
+      typeSel?.value && !String(typeSel.value).toLowerCase().includes("all")
+        ? mapJobType(typeSel.value)
+        : "";
+
+    return { location, type };
+  };
+
+  async function renderJobs() {
+    setListState(list, { variant: "loading", title: "Loading jobs…" });
+
+    try {
+      const payload = await getJobs(getFilterValues());
+      const jobs = payload.jobs || [];
+      if (!jobs.length) {
+        return setListState(list, {
+          variant: "empty",
+          title: "No jobs found",
+          detail: token ? "Try changing filters." : "Login to apply to jobs.",
+        });
+      }
+
+      list.innerHTML = jobs
+        .map(
+          (job) => `
+          <div class="job-card">
+            <div class="job-header">
+              <h3>${escapeHtml(job.title)}</h3>
+              <div class="job-meta">
+                <span class="job-company">${escapeHtml(job.company || job.postedBy?.name || "")}</span>
+                <span class="job-location">• ${escapeHtml(job.location || "")}</span>
+                <span class="job-type">${escapeHtml(job.type || "")}</span>
+              </div>
+            </div>
+            <div class="job-details">
+              <div class="job-skills">${escapeHtml((job.skills || []).slice(0, 4).join(" • "))}</div>
+              <div class="job-info">${job.salary ? `Salary: ${escapeHtml(job.salary)}` : ""}</div>
+            </div>
+            <div class="job-actions">
+              <button class="btn-primary" onclick="applyJob('${job._id}')">
+                <i class="fas fa-paper-plane"></i> Apply Now
+              </button>
             </div>
           </div>
-          <div class="job-details">
-            <div class="job-skills">${(job.skills || []).slice(0, 4).join(" • ")}</div>
-            <div class="job-info">${job.salary ? `Salary: ${job.salary}` : ""}</div>
-          </div>
-          <div class="job-actions">
-            <button class="btn-primary" onclick="applyJob('${job._id}')">
-              <i class="fas fa-paper-plane"></i> Apply Now
-            </button>
-          </div>
-        </div>
-      `,
-      )
-      .join("");
-  } catch {
-    // keep static list
+        `,
+        )
+        .join("");
+    } catch {
+      setListState(list, {
+        variant: "error",
+        title: "Could not load jobs",
+        detail: "Please refresh and try again.",
+      });
+    }
   }
+
+  if (filterButton && !filterButton.dataset.bound) {
+    filterButton.dataset.bound = "1";
+    filterButton.addEventListener("click", (e) => {
+      e.preventDefault();
+      renderJobs();
+    });
+  }
+
+  await renderJobs();
 }
 
 async function loadEventsPage() {
   const list = document.querySelector(".event-list");
   if (!list) return;
 
+  const pastContainer = document.querySelector(".past-events");
+  setListState(list, { variant: "loading", title: "Loading events…" });
+  if (pastContainer) {
+    setListState(pastContainer, { variant: "loading", title: "Loading your past events…" });
+  }
+
   try {
     const payload = await getEvents();
     const events = payload.events || [];
-    if (!events.length) return;
+    if (!events.length) {
+      setListState(list, {
+        variant: "empty",
+        title: "No upcoming events",
+        detail: "Check back later.",
+      });
+    } else {
 
-    list.innerHTML = events
-      .map((evt) => {
-        const date = evt.date ? new Date(evt.date) : null;
-        const dateStr = date ? date.toLocaleDateString(undefined, { year: "numeric", month: "short", day: "numeric" }) : "";
-        const timeStr = evt.time || "";
-        const spotsLeft = evt.maxSpots ? Math.max(0, evt.maxSpots - (evt.rsvps?.length || 0)) : null;
-        const spotsText = spotsLeft === null ? "RSVP" : `RSVP (${spotsLeft} spots left)`;
-        const typeLabel = evt.isOnline ? "Online" : `Offline${evt.location ? ` • ${evt.location}` : ""}`;
+      list.innerHTML = events
+        .map((evt) => {
+          const date = evt.date ? new Date(evt.date) : null;
+          const dateStr = date
+            ? date.toLocaleDateString(undefined, {
+                year: "numeric",
+                month: "short",
+                day: "numeric",
+              })
+            : "";
+          const timeStr = evt.time || "";
+          const spotsLeft = evt.maxSpots
+            ? Math.max(0, evt.maxSpots - (evt.rsvps?.length || 0))
+            : null;
+          const spotsText = spotsLeft === null ? "RSVP" : `RSVP (${spotsLeft} spots left)`;
+          const typeLabel = evt.isOnline
+            ? "Online"
+            : `Offline${evt.location ? ` • ${evt.location}` : ""}`;
 
-        return `
-          <div class="event-card">
-            <div class="event-header">
-              <h4>${evt.title}</h4>
-              <div class="event-date">
-                <i class="fas fa-calendar-day"></i> ${dateStr}
-                ${timeStr ? `<span class="event-time">${timeStr}</span>` : ""}
+          return `
+            <div class="event-card">
+              <div class="event-header">
+                <h4>${escapeHtml(evt.title)}</h4>
+                <div class="event-date">
+                  <i class="fas fa-calendar-day"></i> ${escapeHtml(dateStr)}
+                  ${timeStr ? `<span class="event-time">${escapeHtml(timeStr)}</span>` : ""}
+                </div>
+              </div>
+              <p>${escapeHtml(evt.description || "")}</p>
+              <div class="event-actions">
+                <button class="btn-primary" onclick="rsvpEvent('${evt._id}')">
+                  <i class="fas fa-check-circle"></i> ${escapeHtml(spotsText)}
+                </button>
+                <span class="event-type">${escapeHtml(typeLabel)}</span>
               </div>
             </div>
-            <p>${evt.description || ""}</p>
-            <div class="event-actions">
-              <button class="btn-primary" onclick="rsvpEvent('${evt._id}')">
-                <i class="fas fa-check-circle"></i> ${spotsText}
-              </button>
-              <span class="event-type">${typeLabel}</span>
-            </div>
-          </div>
-        `;
-      })
-      .join("");
+          `;
+        })
+        .join("");
+    }
+
+    if (pastContainer) {
+      if (!token) {
+        setListState(pastContainer, {
+          variant: "info",
+          title: "Login to see your past events.",
+        });
+      } else {
+        try {
+          const mine = await apiCall("/events/my-events");
+          const arr = Array.isArray(mine) ? mine : [];
+          const now = new Date();
+          const past = arr.filter((e) => e?.date && new Date(e.date) < now);
+          if (!past.length) {
+            setListState(pastContainer, {
+              variant: "empty",
+              title: "No past events yet",
+            });
+          } else {
+            pastContainer.innerHTML = past
+              .slice(0, 5)
+              .map((e) => {
+                const d = e.date ? new Date(e.date) : null;
+                const ds = d
+                  ? d.toLocaleDateString(undefined, {
+                      year: "numeric",
+                      month: "short",
+                      day: "numeric",
+                    })
+                  : "";
+                return `<div>✅ ${escapeHtml(e.title || "Event")} <span>${escapeHtml(ds)}</span></div>`;
+              })
+              .join("");
+          }
+        } catch {
+          setListState(pastContainer, {
+            variant: "error",
+            title: "Could not load past events",
+          });
+        }
+      }
+    }
   } catch {
-    // keep static list
+    setListState(list, {
+      variant: "error",
+      title: "Could not load events",
+      detail: "Please refresh and try again.",
+    });
   }
 }
 
@@ -385,10 +560,17 @@ async function loadForumPage() {
 
   async function renderPosts() {
     try {
+      setListState(postsContainer, { variant: "loading", title: "Loading discussions…" });
       const category = filter && filter.value && filter.value !== "All Categories" ? mapForumCategory(filter.value) : "";
       const payload = await apiCall(`/posts${category ? `?category=${encodeURIComponent(category)}` : ""}`);
       const posts = payload.posts || [];
-      if (!posts.length) return;
+      if (!posts.length) {
+        return setListState(postsContainer, {
+          variant: "empty",
+          title: "No posts yet",
+          detail: token ? "Be the first to post." : "Login to create a post.",
+        });
+      }
 
       postsContainer.innerHTML = posts
         .map(
@@ -402,7 +584,7 @@ async function loadForumPage() {
                   <span class="post-category">${p.category || "general"}</span>
                 </div>
               </div>
-              <p>${p.content}</p>
+              <p>${escapeHtml(p.content)}</p>
               <div class="post-actions">
                 <span class="like-btn" style="cursor:pointer"><i class="fas fa-heart"></i> ${(p.likes || []).length}</span>
                 <span><i class="fas fa-comment"></i> ${(p.comments || []).length}</span>
@@ -412,7 +594,11 @@ async function loadForumPage() {
         )
         .join("");
     } catch {
-      // keep static posts
+      setListState(postsContainer, {
+        variant: "error",
+        title: "Could not load posts",
+        detail: "Please refresh and try again.",
+      });
     }
   }
 
@@ -459,6 +645,8 @@ async function loadMentorsPage() {
   const grid = document.querySelector(".mentor-grid");
   if (!grid) return;
 
+  setListState(grid, { variant: "loading", title: "Loading mentors…" });
+
   function getSelectedTime() {
     const active = document.querySelector(".time-slot.active");
     return active ? active.textContent.trim() : "";
@@ -492,17 +680,23 @@ async function loadMentorsPage() {
 
   try {
     const mentors = await getMentors();
-    if (!Array.isArray(mentors) || !mentors.length) return;
+    if (!Array.isArray(mentors) || !mentors.length) {
+      return setListState(grid, {
+        variant: "empty",
+        title: "No mentors available right now",
+        detail: "Please check back later.",
+      });
+    }
     grid.innerHTML = mentors
       .map(
         (m) => `
           <div class="mentor-card">
             <div class="mentor-avatar">
-              <img src="${m.profilePic || "https://via.placeholder.com/80/667eea/ffffff?text=AL"}" alt="${m.name}" />
+              <img src="${escapeHtml(m.profilePic || "https://via.placeholder.com/80/667eea/ffffff?text=AL")}" alt="${escapeHtml(m.name)}" />
             </div>
-            <h4>${m.name}</h4>
-            <p class="mentor-role">${m.industry || "Alumni Mentor"}</p>
-            <div class="mentor-skills">${(m.skills || []).slice(0, 4).join(" • ")}</div>
+            <h4>${escapeHtml(m.name)}</h4>
+            <p class="mentor-role">${escapeHtml(m.industry || "Alumni Mentor")}</p>
+            <div class="mentor-skills">${escapeHtml((m.skills || []).slice(0, 4).join(" • "))}</div>
             <div class="mentor-actions">
               <button class="btn-primary" onclick="bookSession('${m._id}')">
                 <i class="fas fa-calendar-plus"></i> Book Now
@@ -513,7 +707,11 @@ async function loadMentorsPage() {
       )
       .join("");
   } catch {
-    // keep static mentors
+    setListState(grid, {
+      variant: "error",
+      title: "Could not load mentors",
+      detail: "Please refresh and try again.",
+    });
   }
 }
 

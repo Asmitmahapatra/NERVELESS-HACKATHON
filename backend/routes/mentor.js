@@ -43,6 +43,30 @@ router.post("/book", auth, async (req, res) => {
   try {
     const { mentorId, date, time, topic } = req.body;
 
+    const isDemoMode = Boolean(req.app?.locals?.demoMode);
+    if (isDemoMode) {
+      const mentor = await demoStore.findUserById(mentorId);
+      if (!mentor || mentor.role !== "alumni") {
+        return res.status(400).json({ error: "Invalid mentor" });
+      }
+
+      const booking = await demoStore.createBooking({
+        studentId: req.user.userId,
+        mentorId,
+        date,
+        time,
+        topic,
+      });
+
+      return res.status(201).json({
+        success: true,
+        booking: {
+          id: booking._id,
+          ...booking,
+        },
+      });
+    }
+
     const mentor = await User.findById(mentorId);
     if (!mentor || mentor.role !== "alumni") {
       return res.status(400).json({ error: "Invalid mentor" });
@@ -74,6 +98,12 @@ router.post("/book", auth, async (req, res) => {
 router.get("/bookings", auth, async (req, res) => {
   try {
     const { role } = req.user; // From middleware
+
+    const isDemoMode = Boolean(req.app?.locals?.demoMode);
+    if (isDemoMode) {
+      const bookings = await demoStore.listBookingsForUser({ userId: req.user.userId, role });
+      return res.json(bookings);
+    }
 
     if (role === "student") {
       // Student bookings

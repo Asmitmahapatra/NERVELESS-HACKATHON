@@ -14,6 +14,15 @@ const state = {
   bookings: [],
 };
 
+function hydratePost(post) {
+  if (!post) return null;
+  const author = state.users.find((u) => u._id === String(post.author));
+  return {
+    ...post,
+    author: author ? { _id: author._id, name: author.name } : null,
+  };
+}
+
 function seedOnce() {
   if (state.users.length > 0) return;
 
@@ -273,7 +282,72 @@ async function listPosts({ category, search, page, limit }) {
   }
 
   posts = posts.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-  return paginate(posts, page, limit);
+  const hydrated = posts.map((p) => hydratePost(p));
+  return paginate(hydrated, page, limit);
+}
+
+async function createPost({ content, category = "general", authorId }) {
+  const now = new Date();
+  const post = {
+    _id: randomUUID(),
+    title: "",
+    content: String(content || "").trim(),
+    category: String(category || "general"),
+    author: String(authorId),
+    likes: [],
+    comments: [],
+    createdAt: now,
+  };
+  state.posts.unshift(post);
+  return hydratePost(post);
+}
+
+async function togglePostLike(postId, userId) {
+  const post = state.posts.find((p) => p._id === String(postId));
+  if (!post) return null;
+  const uid = String(userId);
+  const idx = post.likes.indexOf(uid);
+  if (idx > -1) post.likes.splice(idx, 1);
+  else post.likes.push(uid);
+  return hydratePost(post);
+}
+
+async function addPostComment(postId, userId, content) {
+  const post = state.posts.find((p) => p._id === String(postId));
+  if (!post) return null;
+  post.comments.push({
+    _id: randomUUID(),
+    user: String(userId),
+    content: String(content || "").trim(),
+    createdAt: new Date(),
+  });
+  return hydratePost(post);
+}
+
+async function createBooking({ studentId, mentorId, date, time, topic }) {
+  const booking = {
+    _id: randomUUID(),
+    student: String(studentId),
+    mentor: String(mentorId),
+    date: date ? new Date(date) : new Date(),
+    time: String(time || ""),
+    topic: String(topic || ""),
+    status: "pending",
+    createdAt: new Date(),
+  };
+  state.bookings.push(booking);
+  return { ...booking };
+}
+
+async function listBookingsForUser({ userId, role }) {
+  const uid = String(userId);
+  const relevant = state.bookings.filter((b) =>
+    role === "student" ? b.student === uid : b.mentor === uid,
+  );
+  return relevant
+    .slice()
+    .sort((a, b) => new Date(a.date) - new Date(b.date))
+    .map((b) => ({ ...b }));
 }
 
 async function listMentors({ skills, location }) {
@@ -316,6 +390,11 @@ module.exports = {
   listEvents,
   rsvpEvent,
   listPosts,
+  createPost,
+  togglePostLike,
+  addPostComment,
   listMentors,
+  createBooking,
+  listBookingsForUser,
   _state: state,
 };
