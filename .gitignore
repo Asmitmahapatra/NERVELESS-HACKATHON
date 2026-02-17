@@ -2,8 +2,11 @@
 .env
 .env.*
 !*.env.example
-backend/.env
+
+# Backend: keep a sanitized .env in repo, ignore other variants
 backend/.env.*
+!backend/.env
+!backend/.env.example
 
 # Node
 node_modules/
