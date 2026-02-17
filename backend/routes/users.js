@@ -121,6 +121,49 @@ router.get("/matches", auth, async (req, res) => {
   }
 });
 
+// Get current user's connections
+router.get("/connections", auth, async (req, res) => {
+  try {
+    const isDemoMode = Boolean(req.app?.locals?.demoMode);
+
+    if (isDemoMode) {
+      const user = await demoStore.findUserById(req.user.userId);
+      const ids = Array.isArray(user?.connections) ? user.connections : [];
+      const all = await demoStore.listUsers();
+      const connections = all
+        .filter((u) => ids.includes(u._id))
+        .map((u) => ({
+          _id: u._id,
+          name: u.name,
+          email: u.email,
+          role: u.role,
+          skills: u.skills || [],
+          industry: u.industry || "",
+          location: u.location || "",
+        }));
+      return res.json(connections);
+    }
+
+    const user = await User.findById(req.user.userId)
+      .populate("connections", "name email role skills industry location")
+      .lean();
+
+    const connections = (user?.connections || []).map((u) => ({
+      _id: u._id,
+      name: u.name,
+      email: u.email,
+      role: u.role,
+      skills: u.skills || [],
+      industry: u.industry || "",
+      location: u.location || "",
+    }));
+
+    res.json(connections);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
 // Connect with user
 async function connectHandler(req, res) {
   try {

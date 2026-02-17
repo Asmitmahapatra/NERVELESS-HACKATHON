@@ -84,6 +84,9 @@ async function registerUser(userData) {
 async function getMatches() {
   return await apiCall("/users/matches");
 }
+async function getConnections() {
+  return await apiCall("/users/connections");
+}
 async function getJobs() {
   return await apiCall("/jobs");
 }
@@ -101,6 +104,15 @@ async function getMentors() {
 async function connectUser(userId) {
   await apiCall(`/users/connect/${userId}`);
   alert("✅ Connected!");
+
+  // If user is on dashboard, refresh counts/lists.
+  if (document.getElementById("welcomeMsg") && document.getElementById("topMatches")) {
+    try {
+      await loadDashboard();
+    } catch {
+      // ignore
+    }
+  }
 }
 async function applyJob(jobId) {
   await apiCall(`/jobs/${jobId}/apply`);
@@ -187,18 +199,87 @@ async function loadDashboard() {
     document.getElementById("welcomeMsg").innerHTML =
       `Welcome, <strong>${currentUser.name}</strong> <span class="role-badge ${currentUser.role}">${currentUser.role}</span>`;
 
-    // Load matches
     const matches = await getMatches();
-    document.getElementById("topMatches").innerHTML = matches
-      .slice(0, 5)
-      .map(
-        (m) => `
+    const connections = await getConnections();
+
+    const matchesCountEl = document.getElementById("matchesCount");
+    const connectionsCountEl = document.getElementById("connectionsCount");
+    const matchScoreEl = document.getElementById("matchScore");
+
+    if (matchesCountEl) matchesCountEl.textContent = String(matches.length);
+    if (connectionsCountEl) connectionsCountEl.textContent = String(connections.length);
+
+    if (matchScoreEl) {
+      const avg = matches.length
+        ? Math.round(matches.reduce((sum, m) => sum + (Number(m.matchScore) || 0), 0) / matches.length)
+        : 0;
+      matchScoreEl.textContent = `${avg}%`;
+    }
+
+    const panel = document.getElementById("topMatches");
+    const panelTitle = document.querySelector(".dashboard-grid .card h3");
+
+    const renderMatches = () => {
+      if (panelTitle) panelTitle.innerHTML = '<i class="fas fa-users"></i> Top Matches Today';
+      if (!panel) return;
+      if (!matches.length) {
+        panel.innerHTML = '<div class="connection"><strong>No matches yet.</strong></div>';
+        return;
+      }
+      panel.innerHTML = matches
+        .slice(0, 10)
+        .map(
+          (m) => `
             <div class="connection" onclick="connectUser('${m._id}')">
-                ${m.name} <span>${m.matchScore}%</span>
+                <strong>${m.name}</strong> <span>${m.matchScore}%</span>
             </div>
         `,
-      )
-      .join("");
+        )
+        .join("");
+    };
+
+    const renderConnections = () => {
+      if (panelTitle) panelTitle.innerHTML = '<i class="fas fa-user-check"></i> Your Connections';
+      if (!panel) return;
+      if (!connections.length) {
+        panel.innerHTML = '<div class="connection"><strong>No connections yet.</strong> <span>Connect with a match</span></div>';
+        return;
+      }
+      panel.innerHTML = connections
+        .slice(0, 10)
+        .map(
+          (c) => `
+            <div class="connection">
+                <strong>${c.name}</strong> <span>${(c.role || "").toUpperCase()}</span>
+            </div>
+        `,
+        )
+        .join("");
+    };
+
+    // Wire stat cards to toggle views (only on dashboard page)
+    const matchesCard = matchesCountEl?.closest(".stat-card");
+    const connectionsCard = connectionsCountEl?.closest(".stat-card");
+    const scoreCard = matchScoreEl?.closest(".stat-card");
+
+    if (matchesCard && !matchesCard.dataset.bound) {
+      matchesCard.dataset.bound = "1";
+      matchesCard.style.cursor = "pointer";
+      matchesCard.addEventListener("click", renderMatches);
+    }
+    if (connectionsCard && !connectionsCard.dataset.bound) {
+      connectionsCard.dataset.bound = "1";
+      connectionsCard.style.cursor = "pointer";
+      connectionsCard.addEventListener("click", renderConnections);
+    }
+    if (scoreCard && !scoreCard.dataset.bound) {
+      scoreCard.dataset.bound = "1";
+      scoreCard.style.cursor = "pointer";
+      scoreCard.addEventListener("click", renderMatches);
+    }
+
+    // Default view
+    renderMatches();
   } catch (error) {
     alert("Session expired. Logging out...");
     logout();
