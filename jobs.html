@@ -128,25 +128,6 @@
       </div>
     </div>
 
-    <script>
-      window.onload = async () => {
-        try {
-          const { jobs } = await apiCall("/jobs");
-          document.querySelector(".job-list").innerHTML = jobs
-            .map(
-              (job) => `
-            <div class="job-card">
-                <h3>${job.title}</h3>
-                <div>${job.company} • ${job.location}</div>
-                <button onclick="applyJob('${job._id}')">Apply</button>
-            </div>
-        `,
-            )
-            .join("");
-        } catch (e) {
-          console.log("Jobs loading failed");
-        }
-      };
-    </script>
+    <script src="script.js"></script>
   </body>
 </html>

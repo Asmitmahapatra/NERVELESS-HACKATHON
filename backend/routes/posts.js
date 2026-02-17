@@ -1,12 +1,24 @@
 const express = require("express");
 const Post = require("../models/Post");
 const auth = require("../middleware/auth");
+const demoStore = require("../demoStore");
 const router = express.Router();
 
 // Get posts (with filters)
 router.get("/", async (req, res) => {
   try {
     const { category, search, page = 1, limit = 10 } = req.query;
+
+    const isDemoMode = Boolean(req.app?.locals?.demoMode);
+    if (isDemoMode) {
+      const { items, pagination } = await demoStore.listPosts({
+        category,
+        search,
+        page,
+        limit,
+      });
+      return res.json({ posts: items, pagination });
+    }
 
     const filter = {};
     if (category) filter.category = category;

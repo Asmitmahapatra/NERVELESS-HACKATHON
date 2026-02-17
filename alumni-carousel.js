@@ -1,59 +1,71 @@
-let currentSlideIndex = 0;
-const slides = document.querySelectorAll(".alumni-card");
-const track = document.getElementById("alumniCarousel");
-const dots = document.querySelectorAll(".dot");
-const totalSlides = slides.length / 2; // Account for duplicates
+(() => {
+  function initCarousel() {
+    const track = document.getElementById("alumniCarousel");
+    if (!track) return;
 
-function updateCarousel() {
-  const cardWidth = slides[0].offsetWidth + 32; // width + gap
-  track.style.transform = `translateX(-${currentSlideIndex * cardWidth}px)`;
+    const slides = track.querySelectorAll(".alumni-card");
+    if (!slides.length) return;
 
-  dots.forEach((dot, index) => {
-    dot.classList.toggle("active", index === currentSlideIndex);
-  });
-}
+    const dots = document.querySelectorAll(".carousel-dots .dot");
+    const totalSlides = Math.max(1, Math.floor(slides.length / 2)); // Account for duplicates
+    let currentSlideIndex = 0;
+    let autoSlide = null;
 
-function moveCarousel(direction) {
-  currentSlideIndex += direction;
-  if (currentSlideIndex >= totalSlides) currentSlideIndex = 0;
-  if (currentSlideIndex < 0) currentSlideIndex = totalSlides - 1;
-  updateCarousel();
-}
+    function updateCarousel() {
+      const cardWidth = slides[0].offsetWidth + 32;
+      track.style.transform = `translateX(-${currentSlideIndex * cardWidth}px)`;
+      track.style.transition = "transform 0.8s cubic-bezier(0.4, 0, 0.2, 1)";
 
-function currentSlide(index) {
-  currentSlideIndex = index - 1;
-  updateCarousel();
-}
+      dots.forEach((dot, index) => {
+        dot.classList.toggle("active", index === currentSlideIndex);
+      });
+    }
 
-// Auto-slide
-let autoSlide = setInterval(() => moveCarousel(1), 4000);
+    function moveCarousel(direction) {
+      currentSlideIndex += direction;
+      if (currentSlideIndex >= totalSlides) currentSlideIndex = 0;
+      if (currentSlideIndex < 0) currentSlideIndex = totalSlides - 1;
+      updateCarousel();
+    }
 
-// Pause on hover
-const container = document.querySelector(".alumni-carousel-container");
-container.addEventListener("mouseenter", () => clearInterval(autoSlide));
-container.addEventListener("mouseleave", () => {
-  autoSlide = setInterval(() => moveCarousel(1), 4000);
-});
+    function currentSlide(index) {
+      currentSlideIndex = Math.min(totalSlides - 1, Math.max(0, (index || 1) - 1));
+      updateCarousel();
+    }
 
-updateCarousel();
-// Add these enhanced animation triggers
-document.querySelectorAll(".alumni-card").forEach((card, index) => {
-  card.addEventListener("mouseenter", () => {
-    card.style.animationPlayState = "paused";
-  });
+    // expose for onclick handlers
+    window.moveCarousel = moveCarousel;
+    window.currentSlide = currentSlide;
 
-  card.addEventListener("mouseleave", () => {
-    card.style.animationPlayState = "running";
-  });
-});
+    // Auto-slide
+    autoSlide = setInterval(() => moveCarousel(1), 4000);
 
-// Enhanced smooth scrolling with easing
-function updateCarousel() {
-  const cardWidth = slides[0].offsetWidth + 32;
-  track.style.transform = `translateX(-${currentSlideIndex * cardWidth}px)`;
-  track.style.transition = "transform 0.8s cubic-bezier(0.4, 0, 0.2, 1)";
+    // Pause on hover
+    const container = document.querySelector(".alumni-carousel-container");
+    if (container) {
+      container.addEventListener("mouseenter", () => autoSlide && clearInterval(autoSlide));
+      container.addEventListener("mouseleave", () => {
+        autoSlide = setInterval(() => moveCarousel(1), 4000);
+      });
+    }
 
-  dots.forEach((dot, index) => {
-    dot.classList.toggle("active", index === currentSlideIndex);
-  });
-}
+    // Pause card animation on hover (if any)
+    slides.forEach((card) => {
+      card.addEventListener("mouseenter", () => {
+        card.style.animationPlayState = "paused";
+      });
+      card.addEventListener("mouseleave", () => {
+        card.style.animationPlayState = "running";
+      });
+    });
+
+    updateCarousel();
+    window.addEventListener("resize", updateCarousel);
+  }
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", initCarousel);
+  } else {
+    initCarousel();
+  }
+})();

@@ -4,6 +4,9 @@ const cors = require("cors");
 const path = require("path");
 require("dotenv").config();
 
+const DEFAULT_MONGODB_URI = "mongodb://127.0.0.1:27017/alumlink";
+const { seedDemoData } = require("./seedDemoData");
+
 const app = express();
 
 // MIDDLEWARE
@@ -14,10 +17,36 @@ app.use(express.json());
 app.use(express.static(path.join(__dirname, "..")));
 
 // DATABASE
-mongoose
-  .connect(process.env.MONGODB_URI)
-  .then(() => console.log("✅ MongoDB Connected"))
-  .catch((err) => console.log("❌ MongoDB Error:", err.message));
+app.locals.demoMode = false;
+
+const mongoUri = process.env.MONGODB_URI || "";
+if (!mongoUri) {
+  app.locals.demoMode = true;
+  console.warn(
+    "⚠️  MONGODB_URI not set. Starting in DEMO MODE (in-memory datastore).",
+  );
+} else {
+  mongoose
+    .connect(mongoUri, {
+      serverSelectionTimeoutMS: 2000,
+    })
+    .then(async () => {
+      console.log("✅ MongoDB Connected");
+      try {
+        await seedDemoData();
+      } catch (e) {
+        console.warn("⚠️  Seed failed:", e.message);
+      }
+    })
+    .catch((err) => {
+      app.locals.demoMode = true;
+      console.warn(
+        "⚠️  MongoDB connection failed. Starting in DEMO MODE (in-memory datastore).",
+      );
+      console.warn("MongoDB error:", err.message);
+      console.warn("Tip: set MONGODB_URI or run local Mongo at", DEFAULT_MONGODB_URI);
+    });
+}
 
 // TEST / API ROUTES (prefixed with /api)
 app.get("/api", (req, res) => res.json({ message: "🚀 AlumLink Backend LIVE!" }));
@@ -30,6 +59,7 @@ const eventsRoutes = require("./routes/events");
 const jobsRoutes = require("./routes/jobs");
 const mentorRoutes = require("./routes/mentor");
 const postsRoutes = require("./routes/posts");
+const adminRoutes = require("./routes/admin");
 
 app.use("/api/auth", authRoutes);
 app.use("/api/users", usersRoutes);
@@ -37,6 +67,7 @@ app.use("/api/events", eventsRoutes);
 app.use("/api/jobs", jobsRoutes);
 app.use("/api/mentor", mentorRoutes);
 app.use("/api/posts", postsRoutes);
+app.use("/api/admin", adminRoutes);
 
 // Catch-all: serve index.html for non-API routes (SPA support)
 app.get("*", (req, res) => {

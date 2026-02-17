@@ -1,12 +1,24 @@
 const express = require("express");
 const Event = require("../models/Event");
 const auth = require("../middleware/auth");
+const demoStore = require("../demoStore");
 const router = express.Router();
 
 // Get all events
 router.get("/", async (req, res) => {
   try {
     const { type, location, page = 1, limit = 10 } = req.query;
+
+    const isDemoMode = Boolean(req.app?.locals?.demoMode);
+    if (isDemoMode) {
+      const { items, pagination } = await demoStore.listEvents({
+        type,
+        location,
+        page,
+        limit,
+      });
+      return res.json({ events: items, pagination });
+    }
 
     const filter = {};
     if (type) filter.type = type;
@@ -47,6 +59,28 @@ router.post("/", auth, async (req, res) => {
         .json({ error: "Only alumni/admin can create events" });
     }
 
+    const isDemoMode = Boolean(req.app?.locals?.demoMode);
+    if (isDemoMode) {
+      const event = {
+        _id: require("crypto").randomUUID(),
+        title: req.body.title,
+        description: req.body.description || "",
+        date: req.body.date ? new Date(req.body.date) : new Date(),
+        time: req.body.time || "",
+        location: req.body.location || "",
+        type: req.body.type || "webinar",
+        organizer: req.user.userId,
+        attendees: [],
+        maxSpots: req.body.maxSpots || null,
+        rsvps: [],
+        isOnline: Boolean(req.body.isOnline),
+        link: req.body.link || "",
+        status: "upcoming",
+      };
+      demoStore._state.events.push(event);
+      return res.status(201).json(event);
+    }
+
     const event = new Event({
       ...req.body,
       organizer: req.user.userId,
@@ -65,8 +99,20 @@ router.post("/", auth, async (req, res) => {
 });
 
 // RSVP to event
-router.post("/:eventId/rsvp", auth, async (req, res) => {
+async function rsvpHandler(req, res) {
   try {
+    const isDemoMode = Boolean(req.app?.locals?.demoMode);
+    if (isDemoMode) {
+      const result = await demoStore.rsvpEvent(req.params.eventId, req.user.userId);
+      if (!result.ok) return res.status(404).json({ error: result.error });
+      return res.json({
+        success: true,
+        message: "RSVP confirmed!",
+        spotsLeft: result.spotsLeft,
+        event: result.event,
+      });
+    }
+
     const event = await Event.findById(req.params.eventId);
     if (!event || event.status === "completed") {
       return res.status(404).json({ error: "Event not found or completed" });
@@ -94,7 +140,11 @@ router.post("/:eventId/rsvp", auth, async (req, res) => {
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
-});
+}
+
+// Frontend currently calls this without method (defaults to GET), so support both.
+router.post("/:eventId/rsvp", auth, rsvpHandler);
+router.get("/:eventId/rsvp", auth, rsvpHandler);
 
 // Get my events
 router.get("/my-events", auth, async (req, res) => {

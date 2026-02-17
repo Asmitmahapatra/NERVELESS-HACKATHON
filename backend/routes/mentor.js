@@ -2,12 +2,19 @@ const express = require("express");
 const Booking = require("../models/Booking");
 const User = require("../models/User");
 const auth = require("../middleware/auth");
+const demoStore = require("../demoStore");
 const router = express.Router();
 
 // Get available mentors
 router.get("/mentors", async (req, res) => {
   try {
     const { skills, location } = req.query;
+
+    const isDemoMode = Boolean(req.app?.locals?.demoMode);
+    if (isDemoMode) {
+      const mentors = await demoStore.listMentors({ skills, location });
+      return res.json(mentors);
+    }
 
     const filter = {
       role: "alumni",
