@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Forum - AlumLink</title>
+    <link rel="stylesheet" href="style.css" />
+    <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    <header>
+      <nav class="navbar">
+        <div class="nav-brand">🔔 <span>AlumLink</span></div>
+        <ul class="nav-menu">
+          <li><a href="dashboard.html">Dashboard</a></li>
+          <li><a href="index.html">Home</a></li>
+          <li><a href="jobs.html">Jobs</a></li>
+          <li><a href="#" onclick="logout()">Logout</a></li>
+        </ul>
+      </nav>
+    </header>
+
+    <div class="container dashboard-container">
+      <div
+        style="
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          margin-bottom: 2rem;
+        "
+      >
+        <h1><i class="fas fa-comments"></i> Discussion Forum</h1>
+        <select class="forum-filter">
+          <option>All Categories</option>
+          <option>Job Referrals</option>
+          <option>Higher Studies</option>
+          <option>Tech Trends</option>
+        </select>
+      </div>
+
+      <div class="dashboard-grid">
+        <div class="card" style="grid-column: span 2">
+          <div class="forum-posts">
+            <div class="forum-post">
+              <div class="post-header">
+                <img
+                  src="https://via.placeholder.com/40/667eea/ffffff?text=PS"
+                  class="post-avatar"
+                />
+                <div>
+                  <strong>Priya Sharma</strong>
+                  <span class="post-time">• 2h ago</span>
+                  <span class="post-category">Job Referral</span>
+                </div>
+              </div>
+              <p>
+                "Anyone from Google/Amazon willing to refer for SDE roles? DM
+                requirements!"
+              </p>
+              <div class="post-actions">
+                <span><i class="fas fa-heart"></i> 23</span>
+                <span><i class="fas fa-comment"></i> 8</span>
+              </div>
+            </div>
+
+            <div class="forum-post">
+              <div class="post-header">
+                <img
+                  src="https://via.placeholder.com/40/ff6b6b/ffffff?text=RP"
+                  class="post-avatar"
+                />
+                <div>
+                  <strong>Rahul Patel</strong>
+                  <span class="post-time">• 5h ago</span>
+                  <span class="post-category">Higher Studies</span>
+                </div>
+              </div>
+              <p>
+                "Best MS programs for CS in USA? Need advice on GRE +
+                application strategy."
+              </p>
+              <div class="post-actions">
+                <span><i class="fas fa-heart"></i> 15</span>
+                <span><i class="fas fa-comment"></i> 12</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <h3><i class="fas fa-plus"></i> Create Post</h3>
+          <textarea
+            class="post-input"
+            placeholder="Share your question, opportunity, or advice..."
+          ></textarea>
+          <button class="btn-primary full-width">Post Discussion</button>
+        </div>
+      </div>
+    </div>
+
+    <script src="script.js"></script>
+  </body>
+</html>

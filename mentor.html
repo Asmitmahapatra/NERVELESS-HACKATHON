@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Book Mentor - AlumLink</title>
+    <link rel="stylesheet" href="style.css" />
+    <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    <header>
+      <nav class="navbar">
+        <div class="nav-brand">🔔 <span>AlumLink</span></div>
+        <ul class="nav-menu">
+          <li><a href="dashboard.html">Dashboard</a></li>
+          <li><a href="index.html">Home</a></li>
+          <li><a href="jobs.html">Jobs</a></li>
+          <li><a href="#" onclick="logout()">Logout</a></li>
+        </ul>
+      </nav>
+    </header>
+
+    <div class="container dashboard-container">
+      <h1><i class="fas fa-user-tie"></i> Book a Mentor</h1>
+
+      <div class="dashboard-grid">
+        <div class="card">
+          <h3><i class="fas fa-star"></i> Top Mentors</h3>
+          <div class="mentor-grid">
+            <div class="mentor-card">
+              <div class="mentor-avatar">
+                <img
+                  src="https://via.placeholder.com/80/667eea/ffffff?text=PS"
+                  alt="Priya"
+                />
+              </div>
+              <h4>Priya Sharma</h4>
+              <p class="mentor-role">Data Scientist @ Google</p>
+              <div class="mentor-skills">Python • ML • Career Growth</div>
+              <div class="mentor-actions">
+                <button class="btn-primary" onclick="bookSession(1)">
+                  <i class="fas fa-calendar-plus"></i> Book Now
+                </button>
+                <span class="match-score">92% Match</span>
+              </div>
+            </div>
+            <div class="mentor-card">
+              <div class="mentor-avatar">
+                <img
+                  src="https://via.placeholder.com/80/ff6b6b/ffffff?text=RP"
+                  alt="Rahul"
+                />
+              </div>
+              <h4>Rahul Patel</h4>
+              <p class="mentor-role">Fullstack @ Microsoft</p>
+              <div class="mentor-skills">React • Node.js • System Design</div>
+              <div class="mentor-actions">
+                <button class="btn-primary" onclick="bookSession(2)">
+                  <i class="fas fa-calendar-plus"></i> Book Now
+                </button>
+                <span class="match-score">87% Match</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <h3><i class="fas fa-calendar"></i> Booking Calendar</h3>
+          <div class="calendar-container">
+            <input type="date" id="mentorDate" class="calendar-input" />
+            <div class="time-slots">
+              <button class="time-slot">10:00 AM</button>
+              <button class="time-slot">2:00 PM</button>
+              <button class="time-slot">4:00 PM</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script src="script.js"></script>
+    <script>
+      function bookSession(mentorId) {
+        alert("✅ Session booked successfully! Check your dashboard.");
+      }
+    </script>
+  </body>
+</html>

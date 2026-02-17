@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Login - AlumLink</title>
+    <link rel="stylesheet" href="style.css" />
+    <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+  <body class="auth-page">
+    <div class="auth-container">
+      <div class="auth-card">
+        <div class="auth-logo"><i class="fas fa-users"></i> AlumLink</div>
+        <h1>👋 Welcome Back</h1>
+        <p>Connect with your alumni network</p>
+
+        <div class="role-tabs">
+          <button class="tab active" onclick="showTab('login')">Login</button>
+          <button class="tab" onclick="showTab('register')">Register</button>
+        </div>
+
+        <form
+          id="loginForm"
+          class="auth-form"
+          onsubmit="handleAuthSubmit(event)"
+        >
+          <input
+            type="email"
+            id="loginEmail"
+            placeholder="Email Address"
+            required
+          />
+          <input
+            type="password"
+            id="loginPassword"
+            placeholder="Password"
+            required
+          />
+          <button type="submit" class="btn-primary full-width">
+            <i class="fas fa-sign-in-alt"></i> Sign In
+          </button>
+        </form>
+
+        <form
+          id="registerForm"
+          class="auth-form"
+          style="display: none"
+          onsubmit="handleAuthSubmit(event)"
+        >
+          <input type="text" id="regName" placeholder="Full Name" required />
+          <input
+            type="email"
+            id="regEmail"
+            placeholder="Email Address"
+            required
+          />
+          <input
+            type="password"
+            id="regPassword"
+            placeholder="Create Password"
+            required
+          />
+          <select id="regRole" required>
+            <option value="">Select Role</option>
+            <option value="student">🎓 Student</option>
+            <option value="alumni">💼 Alumni</option>
+          </select>
+          <input
+            type="text"
+            id="regSkills"
+            placeholder="Skills (Python, Marketing, AI)"
+          />
+          <input type="text" id="regLocation" placeholder="Location/City" />
+          <button type="submit" class="btn-primary full-width">
+            <i class="fas fa-user-plus"></i> Create Account
+          </button>
+        </form>
+
+        <div class="demo-login">
+          <p><strong>Quick Demo:</strong></p>
+          <div>👩‍💻 priya@alum.com / 123</div>
+          <div>🎓 anita@alum.com / 123</div>
+        </div>
+      </div>
+    </div>
+    <script src="script.js"></script>
+  </body>
+</html>

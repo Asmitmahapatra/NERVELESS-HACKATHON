@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Support AlumLink - Donation</title>
+    <link rel="stylesheet" href="style.css" />
+    <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    <header>
+      <nav class="navbar">
+        <div class="nav-brand">🔔 <span>AlumLink</span></div>
+        <ul class="nav-menu">
+          <li><a href="dashboard.html">Dashboard</a></li>
+          <li><a href="index.html">Home</a></li>
+          <li><a href="jobs.html">Jobs</a></li>
+          <li><a href="#" onclick="logout()">Logout</a></li>
+        </ul>
+      </nav>
+    </header>
+
+    <div class="container dashboard-container">
+      <div class="auth-card donate-card">
+        <div class="donate-hero">
+          <i class="fas fa-heart"></i>
+          <h1>Support AlumLink</h1>
+          <p>
+            Help us connect 10K+ more students with life-changing opportunities
+          </p>
+        </div>
+
+        <div class="donation-amounts">
+          <button class="donate-btn" data-amount="500">₹500</button>
+          <button class="donate-btn" data-amount="1000">₹1,000</button>
+          <button class="donate-btn active" data-amount="5000">₹5,000</button>
+          <button class="donate-btn" data-amount="10000">₹10,000</button>
+        </div>
+
+        <div class="custom-donation">
+          <input
+            type="number"
+            placeholder="Custom Amount"
+            class="custom-input"
+          />
+          <button class="btn-primary full-width">
+            <i class="fas fa-credit-card"></i> Donate Now
+          </button>
+        </div>
+
+        <div class="donation-features">
+          <div class="feature-item">
+            <i class="fas fa-lock"></i>
+            <span>100% Secure & Transparent</span>
+          </div>
+          <div class="feature-item">
+            <i class="fas fa-file-invoice-dollar"></i>
+            <span>Tax Benefits Available</span>
+          </div>
+        </div>
+
+        <div class="recent-donors">
+          <h3>Recent Contributors</h3>
+          <div class="donor-list">
+            <div>Rahul Patel <span>₹2,000</span></div>
+            <div>Priya Sharma <span>₹1,000</span></div>
+            <div>Vikram Singh <span>₹5,000</span></div>
+          </div>
+          <p style="text-align: center; color: #9ca3af; margin-top: 1rem">
+            Total Raised: ₹4.2L • 847 donors
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <script src="script.js"></script>
+    <script>
+      document.querySelectorAll(".donate-btn").forEach((btn) => {
+        btn.onclick = () => {
+          document
+            .querySelectorAll(".donate-btn")
+            .forEach((b) => b.classList.remove("active"));
+          btn.classList.add("active");
+        };
+      });
+    </script>
+  </body>
+</html>

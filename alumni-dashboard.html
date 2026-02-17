@@ -1,0 +1,188 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Alumni Dashboard - AlumLink</title>
+    <link rel="stylesheet" href="style.css" />
+    <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    <header>
+      <nav class="navbar">
+        <div class="nav-brand">🔔 <span>AlumLink</span></div>
+        <ul class="nav-menu">
+          <li><a href="dashboard.html">Main Dashboard</a></li>
+          <li><a href="index.html">Home</a></li>
+          <li><a href="jobs.html">Jobs</a></li>
+          <li><a href="#" onclick="logout()">Logout</a></li>
+        </ul>
+      </nav>
+    </header>
+
+    <div class="dashboard-wrapper">
+      <!-- Sidebar -->
+      <aside class="sidebar">
+        <div class="sidebar-profile">
+          <img
+            src="https://via.placeholder.com/80/667eea/ffffff?text=PS"
+            class="profile-pic"
+            alt="Profile"
+          />
+          <h3>Priya Sharma</h3>
+          <span class="profile-role">TAT CSEA Alumni</span>
+        </div>
+        <nav class="sidebar-nav">
+          <a href="#" class="nav-item active"
+            ><i class="fas fa-id-card"></i> Profile</a
+          >
+          <a href="#" class="nav-item"
+            ><i class="fas fa-graduation-cap"></i> Academics</a
+          >
+          <a href="#" class="nav-item"
+            ><i class="fas fa-briefcase"></i> Placements</a
+          >
+          <a href="#" class="nav-item"
+            ><i class="fas fa-chart-line"></i> Career Progress</a
+          >
+          <a href="#" class="nav-item"
+            ><i class="fas fa-edit"></i> Edit Profile</a
+          >
+        </nav>
+      </aside>
+
+      <!-- Main Content -->
+      <main class="dashboard-main">
+        <!-- Profile Card -->
+        <section class="profile-section">
+          <h2><i class="fas fa-user"></i> Profile Overview</h2>
+          <div class="profile-grid">
+            <div class="profile-card">
+              <img
+                src="https://via.placeholder.com/120/667eea/ffffff?text=PS"
+                alt="Abhise Ghose"
+              />
+              <div class="profile-info">
+                <h3>Abhishek Ghose</h3>
+                <span class="batch">TAT CSEA 2022</span>
+                <div class="profile-badges">
+                  <span class="badge alumni">Alumni</span>
+                  <span class="badge verified">Verified</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Academic & Placement Details -->
+        <div class="dashboard-grid">
+          <div class="card">
+            <h3><i class="fas fa-graduation-cap"></i> Academic Details</h3>
+            <div class="detail-row">
+              <span>College:</span>
+              <span>TAT - CSEA</span>
+            </div>
+            <div class="detail-row">
+              <span>Batch:</span>
+              <span>2022</span>
+            </div>
+            <div class="detail-row">
+              <span>CGPA:</span>
+              <span>9.2/10</span>
+            </div>
+          </div>
+
+          <div class="card">
+            <h3><i class="fas fa-briefcase"></i> Current Placement</h3>
+            <div class="detail-row">
+              <span>Role:</span>
+              <span>Senior Data Scientist</span>
+            </div>
+            <div class="detail-row">
+              <span>Company:</span>
+              <span><i class="fab fa-google"></i> Google</span>
+            </div>
+            <div class="detail-row">
+              <span>Experience:</span>
+              <span>3.5 Years</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Skills & Achievements -->
+        <div class="dashboard-grid">
+          <div class="card">
+            <h3><i class="fas fa-tags"></i> Skills</h3>
+            <div class="skills-grid">
+              <span class="skill-tag">Python</span>
+              <span class="skill-tag">Machine Learning</span>
+              <span class="skill-tag">Data Science</span>
+              <span class="skill-tag">AWS</span>
+              <span class="skill-tag">Leadership</span>
+            </div>
+          </div>
+
+          <div class="card">
+            <h3><i class="fas fa-trophy"></i> Achievements Timeline</h3>
+            <div class="timeline">
+              <div class="timeline-item">
+                <span class="timeline-date">2025</span>
+                <div class="timeline-content">
+                  <h4>Kaggle Grandmaster</h4>
+                  <p>Top 0.1% worldwide</p>
+                </div>
+              </div>
+              <div class="timeline-item">
+                <span class="timeline-date">2024</span>
+                <div class="timeline-content">
+                  <h4>Google SDE-2 Promotion</h4>
+                  <p>Fastest promotion in team</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Career Progress -->
+        <section class="career-progress">
+          <h2><i class="fas fa-chart-line"></i> Career Progress</h2>
+          <div class="progress-container">
+            <div class="progress-step active">
+              <div class="step-circle">1</div>
+              <span>Student</span>
+            </div>
+            <div class="progress-step active">
+              <div class="step-circle">2</div>
+              <span>Intern</span>
+            </div>
+            <div class="progress-step active">
+              <div class="step-circle">3</div>
+              <span>Placed</span>
+            </div>
+            <div class="progress-step active">
+              <div class="step-circle">4</div>
+              <span>Experienced</span>
+            </div>
+          </div>
+          <div class="progress-bar">
+            <div class="progress-fill" style="width: 85%"></div>
+          </div>
+          <p class="progress-text">85% Career Progression Achieved</p>
+        </section>
+      </main>
+    </div>
+
+    <!-- Footer -->
+    [Include your footer code here]
+
+    <script src="script.js"></script>
+    <script src="alumni-dashboard.js"></script>
+  </body>
+</html>

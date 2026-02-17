@@ -1,0 +1,152 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Jobs - AlumLink</title>
+    <link rel="stylesheet" href="style.css" />
+    <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      /* Specific override for black filter text */
+      .filters-row .filter-select {
+        color: #000000 !important;
+        background: rgba(255, 255, 255, 0.9) !important;
+      }
+      .filters-row .filter-select option {
+        color: #000000 !important;
+        background: #ffffff !important;
+      }
+      .filters-row {
+        color: #000000 !important;
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <nav class="navbar">
+        <div class="nav-brand">🔔 <span>AlumLink</span></div>
+        <ul class="nav-menu">
+          <li><a href="dashboard.html">Dashboard</a></li>
+          <li><a href="index.html">Home</a></li>
+          <li><a href="mentor.html">Mentors</a></li>
+          <li><a href="forum.html">Forum</a></li>
+          <li><a href="events.html">Events</a></li>
+          <li><a href="#" onclick="logout()">Logout</a></li>
+        </ul>
+      </nav>
+    </header>
+
+    <div class="container dashboard-container">
+      <div class="page-header">
+        <h1><i class="fas fa-briefcase"></i> Job & Internship Board</h1>
+        <p>Exclusive opportunities posted by alumni network</p>
+      </div>
+
+      <div class="filters-row">
+        <select class="filter-select">
+          <option>All Domains</option>
+          <option>Tech</option>
+          <option>Marketing</option>
+          <option>Finance</option>
+          <option>Consulting</option>
+        </select>
+        <select class="filter-select">
+          <option>All Locations</option>
+          <option>Bangalore</option>
+          <option>Mumbai</option>
+          <option>Delhi</option>
+          <option>Remote</option>
+        </select>
+        <select class="filter-select">
+          <option>All Types</option>
+          <option>Full-time</option>
+          <option>Internship</option>
+          <option>Contract</option>
+        </select>
+        <button class="btn-primary">
+          <i class="fas fa-search"></i> Filter
+        </button>
+      </div>
+
+      <div class="dashboard-grid">
+        <div class="card full-span">
+          <div class="job-list">
+            <div class="job-card">
+              <div class="job-header">
+                <h3>SDE Intern @ Google</h3>
+                <div class="job-meta">
+                  <span class="job-company">Posted by Priya Sharma</span>
+                  <span class="job-location">• Bangalore</span>
+                  <span class="job-type">Internship</span>
+                </div>
+              </div>
+              <div class="job-details">
+                <div class="job-skills">Python • ML • Cloud</div>
+                <div class="job-info">3 months • Stipend: ₹50k/month</div>
+              </div>
+              <div class="job-actions">
+                <button class="btn-primary">
+                  <i class="fas fa-paper-plane"></i> Apply Now
+                </button>
+                <button class="btn-secondary">
+                  <i class="fas fa-handshake"></i> Get Referral
+                </button>
+              </div>
+            </div>
+
+            <div class="job-card">
+              <div class="job-header">
+                <h3>Marketing Associate @ McKinsey</h3>
+                <div class="job-meta">
+                  <span class="job-company">Posted by Vikram Joshi</span>
+                  <span class="job-location">• Mumbai</span>
+                  <span class="job-type">Full-time</span>
+                </div>
+              </div>
+              <div class="job-details">
+                <div class="job-skills">Strategy • Analytics • Consulting</div>
+                <div class="job-info">₹15-18 LPA • Immediate Joiner</div>
+              </div>
+              <div class="job-actions">
+                <button class="btn-primary">
+                  <i class="fas fa-paper-plane"></i> Apply Now
+                </button>
+                <button class="btn-secondary">
+                  <i class="fas fa-handshake"></i> Get Referral
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      window.onload = async () => {
+        try {
+          const { jobs } = await apiCall("/jobs");
+          document.querySelector(".job-list").innerHTML = jobs
+            .map(
+              (job) => `
+            <div class="job-card">
+                <h3>${job.title}</h3>
+                <div>${job.company} • ${job.location}</div>
+                <button onclick="applyJob('${job._id}')">Apply</button>
+            </div>
+        `,
+            )
+            .join("");
+        } catch (e) {
+          console.log("Jobs loading failed");
+        }
+      };
+    </script>
+  </body>
+</html>

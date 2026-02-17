@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Events - AlumLink</title>
+    <link rel="stylesheet" href="style.css" />
+    <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    <header>
+      <nav class="navbar">
+        <div class="nav-brand">🔔 <span>AlumLink</span></div>
+        <ul class="nav-menu">
+          <li><a href="dashboard.html">Dashboard</a></li>
+          <li><a href="index.html">Home</a></li>
+          <li><a href="jobs.html">Jobs</a></li>
+          <li><a href="forum.html">Forum</a></li>
+          <li><a href="#" onclick="logout()">Logout</a></li>
+        </ul>
+      </nav>
+    </header>
+
+    <div class="container dashboard-container">
+      <div class="page-header">
+        <h1><i class="fas fa-calendar-alt"></i> Events & Webinars</h1>
+        <p>Never miss alumni reunions, workshops & career sessions</p>
+      </div>
+
+      <div class="dashboard-grid">
+        <div class="card">
+          <h3><i class="fas fa-clock"></i> Upcoming Events</h3>
+          <div class="event-list">
+            <div class="event-card">
+              <div class="event-header">
+                <h4>Tech Careers AMA with Google Alumni</h4>
+                <div class="event-date">
+                  <i class="fas fa-calendar-day"></i> Feb 20, 2026
+                  <span class="event-time">7:00 PM IST</span>
+                </div>
+              </div>
+              <p>
+                Live Q&A with SDE-2 from Google. Ask anything about tech
+                careers!
+              </p>
+              <div class="event-actions">
+                <button class="btn-primary">
+                  <i class="fas fa-check-circle"></i> RSVP (45 spots left)
+                </button>
+                <span class="event-type">Online</span>
+              </div>
+            </div>
+
+            <div class="event-card">
+              <div class="event-header">
+                <h4>Startup Pitch Night</h4>
+                <div class="event-date">
+                  <i class="fas fa-calendar-day"></i> Mar 5, 2026
+                  <span class="event-time">6:00 PM IST</span>
+                </div>
+              </div>
+              <p>
+                5 alumni startups presenting. Network with founders & investors.
+              </p>
+              <div class="event-actions">
+                <button class="btn-primary">
+                  <i class="fas fa-check-circle"></i> Register Now
+                </button>
+                <span class="event-type">Offline • Bangalore</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <h3><i class="fas fa-history"></i> Your Past Events</h3>
+          <div class="past-events">
+            <div>✅ AI Careers Panel <span>98% rating</span></div>
+            <div>✅ Alumni Reunion 2025 <span>92% rating</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script src="script.js"></script>
+  </body>
+</html>
