@@ -16,7 +16,7 @@ npm install
 2) Create env:
 
 - Copy `backend/.env.example` to `backend/.env` (or edit the existing `backend/.env`)
-- For demo mode (no MongoDB), leave `MONGODB_URI` unset.
+- Set `MONGODB_URI` to a valid MongoDB connection string.
 
 3) Start backend:
 
@@ -48,4 +48,5 @@ Then deploy. Render will run:
 
 Notes:
 - The app reads `PORT` from the platform.
-- If MongoDB is unavailable, the backend falls back to DEMO mode.
+- MongoDB is required; backend startup fails if MongoDB is not configured/connected.
+- Use `GET /api/health` to verify mode/connection status.

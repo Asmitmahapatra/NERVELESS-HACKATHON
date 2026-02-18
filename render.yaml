@@ -12,8 +12,8 @@ services:
         value: production
       - key: JWT_SECRET
         generateValue: true
-      # Set this in Render Dashboard after creation (do not commit secrets):
+      # Required: set this in Render Dashboard after creation (do not commit secrets):
       # - key: MONGODB_URI
       #   value: mongodb+srv://<user>:<password>@<cluster>/<db>?retryWrites=true&w=majority
       - key: SEED_DEMO
-        value: "true"
+        value: "false"

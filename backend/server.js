@@ -4,7 +4,6 @@ const cors = require("cors");
 const path = require("path");
 require("dotenv").config();
 
-const DEFAULT_MONGODB_URI = "mongodb://127.0.0.1:27017/alumlink";
 const { seedDemoData } = require("./seedDemoData");
 
 const app = express();
@@ -28,35 +27,6 @@ app.use(express.static(path.join(__dirname, "..")));
 
 // DATABASE
 app.locals.demoMode = false;
-
-const mongoUri = process.env.MONGODB_URI || "";
-if (!mongoUri) {
-  app.locals.demoMode = true;
-  console.warn(
-    "⚠️  MONGODB_URI not set. Starting in DEMO MODE (in-memory datastore).",
-  );
-} else {
-  mongoose
-    .connect(mongoUri, {
-      serverSelectionTimeoutMS: 2000,
-    })
-    .then(async () => {
-      console.log("✅ MongoDB Connected");
-      try {
-        await seedDemoData();
-      } catch (e) {
-        console.warn("⚠️  Seed failed:", e.message);
-      }
-    })
-    .catch((err) => {
-      app.locals.demoMode = true;
-      console.warn(
-        "⚠️  MongoDB connection failed. Starting in DEMO MODE (in-memory datastore).",
-      );
-      console.warn("MongoDB error:", err.message);
-      console.warn("Tip: set MONGODB_URI or run local Mongo at", DEFAULT_MONGODB_URI);
-    });
-}
 
 // TEST / API ROUTES (prefixed with /api)
 app.get("/api", (req, res) => res.json({ message: "🚀 AlumLink Backend LIVE!" }));
@@ -119,4 +89,29 @@ function startServer(port) {
   });
 }
 
-startServer(DEFAULT_PORT);
+async function bootstrap() {
+  const mongoUri = process.env.MONGODB_URI || "";
+  if (!mongoUri) {
+    console.error("❌ MONGODB_URI is required. Backend will not start without MongoDB.");
+    process.exit(1);
+  }
+
+  try {
+    await mongoose.connect(mongoUri, {
+      serverSelectionTimeoutMS: 5000,
+    });
+    console.log("✅ MongoDB Connected");
+    try {
+      await seedDemoData();
+    } catch (e) {
+      console.warn("⚠️  Seed failed:", e.message);
+    }
+    startServer(DEFAULT_PORT);
+  } catch (err) {
+    console.error("❌ MongoDB connection failed. Backend will not start.");
+    console.error("MongoDB error:", err.message);
+    process.exit(1);
+  }
+}
+
+bootstrap();
