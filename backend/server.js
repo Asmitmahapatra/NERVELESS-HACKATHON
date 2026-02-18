@@ -62,6 +62,20 @@ if (!mongoUri) {
 app.get("/api", (req, res) => res.json({ message: "🚀 AlumLink Backend LIVE!" }));
 app.get("/api/test", (req, res) => res.json({ status: "✅ Working!" }));
 
+app.get("/api/health", (req, res) => {
+  const mongoConfigured = Boolean(process.env.MONGODB_URI);
+  const mongoConnected = mongoose.connection?.readyState === 1;
+  res.json({
+    status: "ok",
+    demoMode: Boolean(app.locals.demoMode),
+    mongo: {
+      configured: mongoConfigured,
+      connected: mongoConnected,
+    },
+    timestamp: new Date().toISOString(),
+  });
+});
+
 // Mount route modules
 const authRoutes = require("./routes/auth");
 const usersRoutes = require("./routes/users");
