@@ -13,6 +13,16 @@ const app = express();
 app.use(cors({ origin: "*" }));
 app.use(express.json());
 
+// Prevent stale HTML being served after deployments (useful on hosting/CDNs)
+app.use((req, res, next) => {
+  if (req.method === "GET" && (req.path === "/" || req.path.endsWith(".html"))) {
+    res.setHeader("Cache-Control", "no-store, max-age=0");
+    res.setHeader("Pragma", "no-cache");
+    res.setHeader("Expires", "0");
+  }
+  next();
+});
+
 // Serve frontend static files (parent folder)
 app.use(express.static(path.join(__dirname, "..")));
 
