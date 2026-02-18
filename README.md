@@ -33,6 +33,8 @@ Open:
 
 This repo includes `render.yaml`.
 
+For a hackathon submission-style overview, see `HACKATHON_SUMMARY.md`.
+
 1) Push to GitHub (already done)
 2) In Render: **New** → **Blueprint** → select your repo
 3) In the created service: set these environment variables:
@@ -41,8 +43,8 @@ This repo includes `render.yaml`.
 - `JWT_SECRET` = a long random string (Render can auto-generate if you keep the blueprint setting)
 
 Then deploy. Render will run:
-- Build: `npm --prefix backend install`
-- Start: `node backend/server.js`
+- Build (in `backend/`): `npm install`
+- Start (in `backend/`): `node server.js`
 
 Notes:
 - The app reads `PORT` from the platform.
