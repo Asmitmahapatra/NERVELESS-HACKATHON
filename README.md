@@ -1,7 +1,7 @@
 # NERVELESS-HACKATHON
 
 Full-stack demo:
-- Frontend: static HTML/CSS/JS (served by the backend)
+- Frontend: React + Vite (`frontend/`)
 - Backend: Node.js + Express API (serves the frontend and `/api/*`)
 
 ## Run locally
@@ -13,20 +13,34 @@ cd backend
 npm install
 ```
 
-2) Create env:
+2) Install frontend deps:
+
+```bash
+cd ../frontend
+npm install
+```
+
+3) Create env:
 
 - Copy `backend/.env.example` to `backend/.env` (or edit the existing `backend/.env`)
 - Set `MONGODB_URI` to a valid MongoDB connection string.
 
-3) Start backend:
+4) Start backend:
 
 ```bash
 cd backend
 npm start
 ```
 
+5) Start React frontend (optional for local UI dev):
+
+```bash
+cd ../frontend
+npm run dev
+```
+
 Open:
-- http://localhost:5000 (frontend)
+- http://localhost:5173 (React app in dev mode)
 - http://localhost:5000/api (API)
 
 ## Deploy (Render)
@@ -43,7 +57,7 @@ For a hackathon submission-style overview, see `HACKATHON_SUMMARY.md`.
 - `JWT_SECRET` = a long random string (Render can auto-generate if you keep the blueprint setting)
 
 Then deploy. Render will run:
-- Build (in `backend/`): `npm install`
+- Build (in `backend/`): `npm install && npm --prefix ../frontend install && npm --prefix ../frontend run build`
 - Start (in `backend/`): `node server.js`
 
 Notes:

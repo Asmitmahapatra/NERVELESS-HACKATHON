@@ -1,4 +1,5 @@
 const express = require("express");
+const fs = require("fs");
 const mongoose = require("mongoose");
 const cors = require("cors");
 const path = require("path");
@@ -22,8 +23,13 @@ app.use((req, res, next) => {
   next();
 });
 
-// Serve frontend static files (parent folder)
-app.use(express.static(path.join(__dirname, "..")));
+const repoRootDir = path.join(__dirname, "..");
+const reactDistDir = path.join(repoRootDir, "frontend", "dist");
+const reactIndexPath = path.join(reactDistDir, "index.html");
+const staticDir = fs.existsSync(reactIndexPath) ? reactDistDir : repoRootDir;
+
+// Serve frontend static files
+app.use(express.static(staticDir));
 
 // DATABASE
 app.locals.demoMode = false;
@@ -66,7 +72,7 @@ app.use("/api/admin", adminRoutes);
 // Catch-all: serve index.html for non-API routes (SPA support)
 app.get("*", (req, res) => {
   if (req.path.startsWith("/api")) return res.status(404).json({ error: "Not found" });
-  res.sendFile(path.join(__dirname, "..", "index.html"));
+  res.sendFile(path.join(staticDir, "index.html"));
 });
 
 // START SERVER with retry if port already in use
@@ -76,6 +82,7 @@ function startServer(port) {
   const server = app.listen(port, () => {
     console.log(`🚀 Backend: http://localhost:${port}`);
     console.log(`📱 Frontend served at http://localhost:${port}`);
+    console.log(`🖥️  Frontend source: ${staticDir}`);
   });
 
   server.on("error", (err) => {
