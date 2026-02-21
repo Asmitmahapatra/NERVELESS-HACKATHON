@@ -1,6 +1,7 @@
 import React from "react";
 import {
   Activity,
+  BarChart3,
   BriefcaseBusiness,
   CalendarDays,
   House,
@@ -12,19 +13,21 @@ import {
 import { NavLink, Outlet, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 
-const navItems = [
-  { to: "/", label: "Home", icon: House },
-  { to: "/app/dashboard", label: "Dashboard", icon: Users },
-  { to: "/app/jobs", label: "Jobs", icon: BriefcaseBusiness },
-  { to: "/app/events", label: "Events", icon: CalendarDays },
-  { to: "/app/forum", label: "Forum", icon: MessageSquare },
-  { to: "/app/mentors", label: "Mentors", icon: Sparkles },
-];
-
 export default function AppLayout() {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
   const role = (user?.role || "member").toUpperCase();
+  const navItems = [
+    { to: "/", label: "Home", icon: House },
+    { to: "/app/dashboard", label: "Dashboard", icon: Users },
+    { to: "/app/jobs", label: "Jobs", icon: BriefcaseBusiness },
+    { to: "/app/events", label: "Events", icon: CalendarDays },
+    { to: "/app/forum", label: "Forum", icon: MessageSquare },
+    { to: "/app/mentors", label: "Mentors", icon: Sparkles },
+    ...(user?.role === "admin"
+      ? [{ to: "/app/admin", label: "Admin", icon: BarChart3 }]
+      : []),
+  ];
 
   return (
     <div className="container" style={{ padding: "1.2rem 0 1.8rem" }}>

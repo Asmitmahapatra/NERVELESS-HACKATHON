@@ -3,12 +3,14 @@ import EmptyState from "../components/EmptyState";
 import Loader from "../components/Loader";
 import PageHeader from "../components/PageHeader";
 import { apiRequest } from "../lib/api";
+import { useToast } from "../context/ToastContext";
 
 export default function EventsPage() {
   const [events, setEvents] = useState([]);
   const [myEvents, setMyEvents] = useState([]);
   const [loading, setLoading] = useState(true);
   const [tab, setTab] = useState("upcoming");
+  const { pushToast } = useToast();
 
   useEffect(() => {
     loadEvents();
@@ -31,10 +33,10 @@ export default function EventsPage() {
   async function rsvp(id) {
     try {
       await apiRequest(`/events/${id}/rsvp`, { method: "POST" });
-      alert("RSVP confirmed");
+      pushToast({ title: "RSVP confirmed", variant: "success" });
       loadEvents();
     } catch (err) {
-      alert(err.message);
+      pushToast({ title: "RSVP failed", description: err.message, variant: "error" });
     }
   }
 

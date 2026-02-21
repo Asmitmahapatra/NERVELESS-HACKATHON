@@ -4,6 +4,7 @@ import EmptyState from "../components/EmptyState";
 import Loader from "../components/Loader";
 import PageHeader from "../components/PageHeader";
 import { apiRequest } from "../lib/api";
+import { useToast } from "../context/ToastContext";
 
 export default function JobsPage() {
   const [jobs, setJobs] = useState([]);
@@ -11,6 +12,7 @@ export default function JobsPage() {
   const [filters, setFilters] = useState({ location: "", type: "" });
   const [search, setSearch] = useState("");
   const [sortBy, setSortBy] = useState("latest");
+  const { pushToast } = useToast();
 
   const loadJobs = useCallback(async () => {
     setLoading(true);
@@ -29,9 +31,9 @@ export default function JobsPage() {
   async function apply(jobId) {
     try {
       await apiRequest(`/jobs/${jobId}/apply`, { method: "POST" });
-      alert("Applied successfully");
+      pushToast({ title: "Application submitted", variant: "success" });
     } catch (err) {
-      alert(err.message);
+      pushToast({ title: "Application failed", description: err.message, variant: "error" });
     }
   }
 

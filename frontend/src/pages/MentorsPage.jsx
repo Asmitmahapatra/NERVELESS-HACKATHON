@@ -3,6 +3,7 @@ import EmptyState from "../components/EmptyState";
 import Loader from "../components/Loader";
 import PageHeader from "../components/PageHeader";
 import { apiRequest } from "../lib/api";
+import { useToast } from "../context/ToastContext";
 
 const slotOptions = ["10:00 AM", "12:30 PM", "3:00 PM", "6:30 PM"];
 
@@ -14,6 +15,7 @@ export default function MentorsPage() {
   const [time, setTime] = useState(slotOptions[0]);
   const [skills, setSkills] = useState("");
   const [location, setLocation] = useState("");
+  const { pushToast } = useToast();
 
   const loadMentors = useCallback(async () => {
       setLoading(true);
@@ -40,7 +42,7 @@ export default function MentorsPage() {
 
   async function book(mentorId) {
     if (!date) {
-      alert("Select a date first");
+      pushToast({ title: "Select a date first", variant: "error" });
       return;
     }
     try {
@@ -53,10 +55,10 @@ export default function MentorsPage() {
           topic: "Mentorship Session",
         },
       });
-      alert("Session booked");
+      pushToast({ title: "Session booked", description: `Scheduled for ${date} at ${time}`, variant: "success" });
       loadMentors();
     } catch (err) {
-      alert(err.message);
+      pushToast({ title: "Booking failed", description: err.message, variant: "error" });
     }
   }
 

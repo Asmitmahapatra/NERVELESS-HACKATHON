@@ -1,6 +1,8 @@
 import { Navigate, Route, Routes } from "react-router-dom";
 import AppLayout from "./components/AppLayout";
 import ProtectedRoute from "./components/ProtectedRoute";
+import RoleRoute from "./components/RoleRoute";
+import AdminPage from "./pages/AdminPage";
 import DashboardPage from "./pages/DashboardPage";
 import EventsPage from "./pages/EventsPage";
 import ForumPage from "./pages/ForumPage";
@@ -29,6 +31,14 @@ function App() {
         <Route path="events" element={<EventsPage />} />
         <Route path="forum" element={<ForumPage />} />
         <Route path="mentors" element={<MentorsPage />} />
+        <Route
+          path="admin"
+          element={
+            <RoleRoute allowedRoles={["admin"]}>
+              <AdminPage />
+            </RoleRoute>
+          }
+        />
       </Route>
 
       <Route path="*" element={<Navigate to="/" replace />} />

@@ -3,6 +3,7 @@ import EmptyState from "../components/EmptyState";
 import Loader from "../components/Loader";
 import PageHeader from "../components/PageHeader";
 import { apiRequest } from "../lib/api";
+import { useToast } from "../context/ToastContext";
 
 export default function ForumPage() {
   const [posts, setPosts] = useState([]);
@@ -11,6 +12,7 @@ export default function ForumPage() {
   const [search, setSearch] = useState("");
   const [comments, setComments] = useState({});
   const [loading, setLoading] = useState(true);
+  const { pushToast } = useToast();
 
   const loadPosts = useCallback(async () => {
     setLoading(true);
@@ -39,18 +41,20 @@ export default function ForumPage() {
         body: { content: content.trim(), category },
       });
       setContent("");
+      pushToast({ title: "Post published", variant: "success" });
       loadPosts();
     } catch (err) {
-      alert(err.message);
+      pushToast({ title: "Post failed", description: err.message, variant: "error" });
     }
   }
 
   async function likePost(id) {
     try {
       await apiRequest(`/posts/${id}/like`, { method: "POST" });
+      pushToast({ title: "Reaction updated", variant: "success", duration: 1500 });
       loadPosts();
     } catch (err) {
-      alert(err.message);
+      pushToast({ title: "Could not react", description: err.message, variant: "error" });
     }
   }
 
@@ -63,9 +67,10 @@ export default function ForumPage() {
         body: { content: value },
       });
       setComments((prev) => ({ ...prev, [postId]: "" }));
+      pushToast({ title: "Comment added", variant: "success" });
       loadPosts();
     } catch (err) {
-      alert(err.message);
+      pushToast({ title: "Comment failed", description: err.message, variant: "error" });
     }
   }
 

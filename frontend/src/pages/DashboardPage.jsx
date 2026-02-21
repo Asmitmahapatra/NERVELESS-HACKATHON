@@ -1,10 +1,20 @@
 import { useEffect, useMemo, useState } from "react";
 import { Gauge, Link2, Sparkles, Users } from "lucide-react";
+import {
+  Area,
+  AreaChart,
+  CartesianGrid,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
+} from "recharts";
 import EmptyState from "../components/EmptyState";
 import PageHeader from "../components/PageHeader";
 import StatCard from "../components/StatCard";
 import Loader from "../components/Loader";
 import { apiRequest } from "../lib/api";
+import { useToast } from "../context/ToastContext";
 
 export default function DashboardPage() {
   const [loading, setLoading] = useState(true);
@@ -12,6 +22,7 @@ export default function DashboardPage() {
   const [matches, setMatches] = useState([]);
   const [connections, setConnections] = useState([]);
   const [mode, setMode] = useState("matches");
+  const { pushToast } = useToast();
 
   useEffect(() => {
     async function load() {
@@ -44,10 +55,19 @@ export default function DashboardPage() {
       const updated = await apiRequest("/users/connections");
       setConnections(Array.isArray(updated) ? updated : []);
       setMode("connections");
+      pushToast({ title: "Connection request sent", variant: "success" });
     } catch (err) {
-      alert(err.message);
+      pushToast({ title: "Could not connect", description: err.message, variant: "error" });
     }
   }
+
+  const trendData = useMemo(() => {
+    const top = matches.slice(0, 6);
+    return top.map((item, index) => ({
+      name: item.name?.split(" ")[0] || `Match ${index + 1}`,
+      score: Number(item.matchScore) || 0,
+    }));
+  }, [matches]);
 
   if (loading) {
     return <Loader label="Building your personalized dashboard..." />;
@@ -114,6 +134,23 @@ export default function DashboardPage() {
               : "Complete profile fields and engage in forum/events to unlock stronger alumni recommendations."}
           </div>
         </article>
+      </section>
+
+      <section className="card" style={{ height: 300 }}>
+        <h3 style={{ marginTop: 0 }}>Match Quality Trend</h3>
+        {trendData.length ? (
+          <ResponsiveContainer width="100%" height="88%">
+            <AreaChart data={trendData}>
+              <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.08)" />
+              <XAxis dataKey="name" stroke="#a1a1b5" />
+              <YAxis stroke="#a1a1b5" />
+              <Tooltip />
+              <Area type="monotone" dataKey="score" stroke="#10d7b5" fill="rgba(16,215,181,0.2)" />
+            </AreaChart>
+          </ResponsiveContainer>
+        ) : (
+          <EmptyState title="Not enough match data" detail="Complete profile details to generate richer analytics." />
+        )}
       </section>
     </div>
   );
