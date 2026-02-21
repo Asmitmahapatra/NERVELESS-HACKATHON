@@ -99,6 +99,30 @@ a {
   gap: 1rem;
 }
 
+.section-grid {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+}
+
+.stack {
+  display: grid;
+  gap: 0.65rem;
+}
+
+.kpi {
+  font-size: 1.65rem;
+  font-weight: 800;
+}
+
+.pill {
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 99px;
+  padding: 0.3rem 0.65rem;
+  font-size: 0.8rem;
+  background: rgba(255, 255, 255, 0.06);
+}
+
 .input,
 .select,
 .textarea {
@@ -141,5 +165,9 @@ a {
 @media (max-width: 900px) {
   .container {
     width: 94%;
+  }
+
+  .mobile-col {
+    grid-template-columns: 1fr !important;
   }
 }

@@ -1,11 +1,14 @@
 import { useEffect, useMemo, useState } from "react";
-import { Users, Link2, Gauge } from "lucide-react";
+import { Gauge, Link2, Sparkles, Users } from "lucide-react";
+import EmptyState from "../components/EmptyState";
+import PageHeader from "../components/PageHeader";
 import StatCard from "../components/StatCard";
 import Loader from "../components/Loader";
 import { apiRequest } from "../lib/api";
 
 export default function DashboardPage() {
   const [loading, setLoading] = useState(true);
+  const [profile, setProfile] = useState(null);
   const [matches, setMatches] = useState([]);
   const [connections, setConnections] = useState([]);
   const [mode, setMode] = useState("matches");
@@ -14,7 +17,12 @@ export default function DashboardPage() {
     async function load() {
       setLoading(true);
       try {
-        const [m, c] = await Promise.all([apiRequest("/users/matches"), apiRequest("/users/connections")]);
+        const [profileRes, m, c] = await Promise.all([
+          apiRequest("/auth/profile"),
+          apiRequest("/users/matches"),
+          apiRequest("/users/connections"),
+        ]);
+        setProfile(profileRes?.user || null);
         setMatches(Array.isArray(m) ? m : []);
         setConnections(Array.isArray(c) ? c : []);
       } finally {
@@ -30,6 +38,17 @@ export default function DashboardPage() {
     return Math.round(total / matches.length);
   }, [matches]);
 
+  async function connectTo(userId) {
+    try {
+      await apiRequest(`/users/connect/${userId}`);
+      const updated = await apiRequest("/users/connections");
+      setConnections(Array.isArray(updated) ? updated : []);
+      setMode("connections");
+    } catch (err) {
+      alert(err.message);
+    }
+  }
+
   if (loading) {
     return <Loader label="Building your personalized dashboard..." />;
   }
@@ -38,27 +57,63 @@ export default function DashboardPage() {
 
   return (
     <div className="grid">
+      <PageHeader
+        title={`Hi ${profile?.name || "there"}, your network is growing 🚀`}
+        subtitle="Track your match quality, expand connections, and convert opportunities into outcomes."
+      />
+
       <section className="grid" style={{ gridTemplateColumns: "repeat(auto-fit,minmax(220px,1fr))" }}>
         <StatCard icon={<Users size={18} />} label="Top Matches" value={matches.length} onClick={() => setMode("matches")} />
         <StatCard icon={<Link2 size={18} />} label="Connections" value={connections.length} onClick={() => setMode("connections")} />
         <StatCard icon={<Gauge size={18} />} label="Avg Match Score" value={`${avgScore}%`} onClick={() => setMode("matches")} />
       </section>
 
-      <section className="card">
+      <section className="card stack">
         <h2 style={{ marginTop: 0 }}>{mode === "matches" ? "Best Matches for You" : "Your Connections"}</h2>
         {!list.length ? (
-          <p className="muted">No {mode} found yet.</p>
+          <EmptyState title={`No ${mode} found yet`} detail="Complete your profile and keep engaging to improve recommendations." />
         ) : (
           <div className="grid" style={{ gridTemplateColumns: "repeat(auto-fit,minmax(220px,1fr))" }}>
             {list.slice(0, 8).map((item) => (
               <article key={item._id} className="card" style={{ background: "rgba(255,255,255,0.03)" }}>
                 <div style={{ fontWeight: 700 }}>{item.name}</div>
                 <div className="muted" style={{ fontSize: ".9rem" }}>{item.industry || item.role || "Alumni"}</div>
-                {mode === "matches" && <div style={{ marginTop: 8 }} className="badge">{item.matchScore || 0}% match</div>}
+                {mode === "matches" && (
+                  <>
+                    <div style={{ marginTop: 8 }} className="badge">{item.matchScore || 0}% match</div>
+                    <button className="btn btn-soft" style={{ marginTop: 10 }} onClick={() => connectTo(item._id)}>
+                      Connect
+                    </button>
+                  </>
+                )}
               </article>
             ))}
           </div>
         )}
+      </section>
+
+      <section className="section-grid">
+        <article className="card stack">
+          <div className="muted">Profile Strength</div>
+          <div className="kpi">{Math.min(100, 40 + (profile?.skills?.length || 0) * 10)}%</div>
+          <div className="muted">Add skills, location, and industry details to improve matching quality.</div>
+        </article>
+        <article className="card stack">
+          <div className="muted">Network Momentum</div>
+          <div className="kpi">{connections.length * 3 + matches.length}</div>
+          <div className="muted">Composite score based on active matches and accepted connections.</div>
+        </article>
+        <article className="card stack">
+          <div style={{ display: "inline-flex", alignItems: "center", gap: 8 }}>
+            <Sparkles size={16} />
+            <strong>Recommendation</strong>
+          </div>
+          <div className="muted">
+            {matches.length > 3
+              ? "You have strong discovery coverage—start converting matches to direct conversations."
+              : "Complete profile fields and engage in forum/events to unlock stronger alumni recommendations."}
+          </div>
+        </article>
       </section>
     </div>
   );
